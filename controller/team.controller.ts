@@ -1,6 +1,8 @@
 import { RequestHandler } from "express";
 import TEAM from "../model/team.model";
 import PLAYER from "../model/player.model";
+import { teamSchemaForCreate, teamSchemaForUpdate, handleZodValidationError } from "../validation/team.validation";
+import { ZodError } from "zod";
 
 
 
@@ -33,14 +35,22 @@ export const getDetailsTeam: RequestHandler = async (req, res) => {
 }
 export const addTeam: RequestHandler = async (req, res) => {
     try {
+        const {
+            teamName: team_name
 
-        const teamName = await TEAM.findOne({ team_name: req.body.teamName })
-        if (teamName) return res.status(500).json({ message: "teamName already exist" });
+        } = req.body;
+
+        const validatedData = teamSchemaForCreate.parse({
+
+            team_name
+        });
+
+        const checkTeamName = await TEAM.findOne({ team_name: validatedData.team_name })
+        if (checkTeamName) return res.status(500).json({ message: "teamName already exist" });
 
 
         const teamData = new TEAM({
-            team_name: req.body.teamName,
-            team_jersey_color: req.body.teamJerseyColor,
+            team_name: validatedData.team_name,
 
         })
         const teamDataSave = await teamData.save()
@@ -48,28 +58,45 @@ export const addTeam: RequestHandler = async (req, res) => {
         res.status(200).json({ message: "Team Created Succesfully", data: teamDataSave });
 
     } catch (err: any) {
-        res.status(500).json({ message: err });
-
-
+        if (err instanceof ZodError) {
+            return handleZodValidationError(err, res);
+        } else {
+            console.error('Other error:', err);
+            res.status(500).json({ message: 'Internal server error' });
+        }
     }
 
 }
 
 
+
+
 export const updatedTeam: RequestHandler = async (req, res) => {
     try {
+        const {
+            teamName: team_name
+        } = req.body;
+
+        const validatedData = teamSchemaForCreate.parse({
+
+            team_name
+        });
 
         const teamId: any = req.params.id
         const teamData = {
-            team_name: req.body.teamName,
-            team_jersey_color: req.body.teamJerseyColor,
+            team_name: validatedData.team_name,
         }
         const teamDataSave = await TEAM.findByIdAndUpdate(teamId, teamData)
 
         res.status(200).json({ message: "Team Updated Succesfully", data: teamDataSave });
 
     } catch (err: any) {
-        res.status(500).json({ message: err });
+        if (err instanceof ZodError) {
+            return handleZodValidationError(err, res);
+        } else {
+            console.error('Other error:', err);
+            res.status(500).json({ message: 'Internal server error' });
+        }
     }
 }
 

@@ -11,11 +11,15 @@ app.use(express.json());
 import playerRoutes from "./routes/player.routes";
 import teamRoutes from "./routes/team.routes";
 import selectedPlayerRoutes from "./routes/selectedPlayer.routes";
+import matchesRoutes from "./routes/match.routes";
+
 
 
 app.use("/player", playerRoutes)
 app.use("/team", teamRoutes)
 app.use("/selectedplayer", selectedPlayerRoutes)
+app.use("/match", matchesRoutes)
+
 
 
 

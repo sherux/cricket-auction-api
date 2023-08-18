@@ -49,8 +49,6 @@ export const getSelectedPlayerList: RequestHandler = async (req, res) => {
             // createdAt: item.createdAt,
             // updatedAt: item.updatedAt
         }));
-
-
         res.status(200).json({ message: "Data Fetch Successfully", data: formattedData });
     } catch (err: any) {
         res.status(500).json({ message: err.message });
@@ -63,10 +61,12 @@ export const getDetailsSelectedPlayer: RequestHandler = async (req, res) => {
     try {
 
         const selectedPlayerId: any = req.params.id
+        if (!mongoose.Types.ObjectId.isValid(selectedPlayerId)) {
+            return res.status(400).json({ message: 'Invalid teamId' });
+        }
 
         const selectedTeamData: any = await SELECTEDPLAYER.findById(selectedPlayerId)
             .populate({
-
                 path: "player_id",
                 select: "name jersey_no -_id",
             })

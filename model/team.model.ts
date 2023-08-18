@@ -7,7 +7,7 @@ import mongoose, { Document, Schema } from 'mongoose';
 // Define the interface for the User document
 interface Team extends Document {
     team_name: string;
-    team_jersey_color: string
+    points: number;
     // player_id: mongoose.Types.ObjectId | Player
 
 }
@@ -15,7 +15,7 @@ interface Team extends Document {
 // Define the schema for the User model
 const teamSchema = new Schema<Team>({
     team_name: { type: String, required: true },
-    team_jersey_color: { type: String, required: true },
+    points: { type: Number, default: 0 },
     // player_id: { type: Schema.Types.ObjectId, ref: 'Player', required: true }
 
 
