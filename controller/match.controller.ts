@@ -4,11 +4,6 @@ import MATCH from "../model/matches.model";
 import TEAM from "../model/team.model";
 import SELECTEDPLAYER from "../model/selectedplyaer.model";
 
-
-
-
-
-
 export const getMatchList: RequestHandler = async (req, res) => {
 
     try {
@@ -63,8 +58,6 @@ export const getDetailsMatch: RequestHandler = async (req, res) => {
 
         };
 
-
-
         res.status(200).json({ message: "data Fetch Succesfully", data: formattedData });
 
     } catch (err: any) {
@@ -73,30 +66,31 @@ export const getDetailsMatch: RequestHandler = async (req, res) => {
 }
 export const addMatch: RequestHandler = async (req, res) => {
     try {
-        // const team1 = req.body.team1
-        // const team2 = req.body.team2
+        const { team1, team2 } = req.body;
 
-        // const totalPlayerInTeam1 = await SELECTEDPLAYER.find({ team_id: team1 })
-        // const totalPlayerInTeam2 = await SELECTEDPLAYER.find({ team_id: team2 })
+        // Check if both teams have at least 11 players (you can add this check if needed)
+        // if (totalPlayerInTeam1.length < 11 || totalPlayerInTeam2.length < 11) {
+        //     return res.status(400).json({ message: "Both teams must have at least 11 players" });
+        // }
 
-        // if (!(totalPlayerInTeam1.length >= 11)) {
-        //     return res.status(400).json({ message: "all team1 member not presnet" })
-        // }
-        // if (!(totalPlayerInTeam2.length >= 11)) {
-        //     return res.status(400).json({ message: "all team2 member not presnet" })
-        // }
+        // Create a new match
         const matchData = new MATCH({
-            team1: req.body.team1,
-            team2: req.body.team2,
-        })
-        const matchDataSave = await matchData.save()
+            team1,
+            team2,
+        });
 
-        res.status(200).json({ message: "Match Created Succesfully", data: matchDataSave });
+        // Update both teams' total matches
+        await TEAM.updateMany(
+            { _id: { $in: [team1, team2] } },
+            { $inc: { total_match: 1 } }
+        );
 
+        // Save the match data
+        const matchDataSave = await matchData.save();
+
+        res.status(200).json({ message: "Match Created Successfully", data: matchDataSave });
     } catch (err: any) {
-        res.status(500).json({ message: err });
-
-
+        res.status(500).json({ message: err.message });
     }
 
 }
@@ -104,7 +98,7 @@ export const addMatch: RequestHandler = async (req, res) => {
 
 export const resultMatches: RequestHandler = async (req, res) => {
     try {
-        const { matchId, winnerId } = req.body;
+        const { matchId, winnerId, loserId } = req.body;
 
 
         const updatedMatch = await MATCH.findByIdAndUpdate(
@@ -119,11 +113,25 @@ export const resultMatches: RequestHandler = async (req, res) => {
 
 
         const winningTeam: any = await TEAM.findById(winnerId);
-        if (winningTeam) {
-            winningTeam.points += 2;
-            await winningTeam.save();
-        }
+        const losingTeam: any = await TEAM.findById(loserId); // Use loserId here
 
+        if (winningTeam && losingTeam) {
+            if (winnerId === loserId) {
+                // It's a draw
+                winningTeam.draw += 1;
+                losingTeam.draw += 1;
+            } else {
+                // One team wins, update their statistics
+                winningTeam.points += 2;
+                winningTeam.won += 1;
+
+                // The other team loses, update their statistics
+                losingTeam.lost += 1;
+            }
+
+            await winningTeam.save();
+            await losingTeam.save();
+        }
         res.status(200).json({ message: 'Match result recorded', data: updatedMatch });
     } catch (error: any) {
         res.status(500).json({ message: error.message });

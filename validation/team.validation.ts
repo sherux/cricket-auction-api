@@ -3,7 +3,7 @@ import { ZodError, z } from "zod";
 
 
 export const teamSchemaForCreate = z.object({
-    team_name: z.string().nonempty("Team Name is required").min(4, { message: ' Team Name must have a minimum length of 4 characters' }),
+    team_name: z.string().nonempty("Team Name is required").min(2, { message: ' Team Name must have a minimum length of 2 characters' }),
 
 
 });
@@ -11,7 +11,7 @@ export const teamSchemaForCreate = z.object({
 
 
 export const teamSchemaForUpdate = z.object({
-    team_name: z.string().nonempty("Team Name is required").min(4, { message: ' Team Name must have a minimum length of 4 characters' }),
+    team_name: z.string().nonempty("Team Name is required").min(2, { message: ' Team Name must have a minimum length of 2 characters' }),
 
 
 });

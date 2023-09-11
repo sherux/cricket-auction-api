@@ -8,6 +8,10 @@ import mongoose, { Document, Schema } from 'mongoose';
 interface Team extends Document {
     team_name: string;
     points: number;
+    total_match: number
+    won: number
+    lost: number
+    draw: number
     // player_id: mongoose.Types.ObjectId | Player
 
 }
@@ -16,6 +20,13 @@ interface Team extends Document {
 const teamSchema = new Schema<Team>({
     team_name: { type: String, required: true },
     points: { type: Number, default: 0 },
+    total_match: { type: Number, default: 0 },
+    won: { type: Number, default: 0 },
+    lost: { type: Number, default: 0 },
+    draw: { type: Number, default: 0 },
+
+
+
     // player_id: { type: Schema.Types.ObjectId, ref: 'Player', required: true }
 
 
